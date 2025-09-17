@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Perfil do Cliente{% endblock %}
+
+{% block content %}
+  <h2>Perfil do Cliente</h2>
+  <form method="post">
+    {{ form.hidden_tag() }}
+
+    <div>
+      {{ form.nome.label }}<br>
+      {{ form.nome(size=32) }}
+    </div>
+
+    <div>
+      <label>CPF</label><br>
+      <input type="text" value="{{ cpf }}" readonly>
+    </div>
+
+    <div>
+      {{ form.submit() }}
+    </div>
+  </form>
+{% endblock %}

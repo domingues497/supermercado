@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Admin{% endblock %}
+
+{% block nav %}
+  <a href="{{ url_for('admin.listar_produtos') }}">Produtos</a>
+  <a href="{{ url_for('admin.listar_clientes') }}">Clientes</a>
+  <a href="{{ url_for('admin.listar_vendas') }}">Vendas</a>
+  <a href="{{ url_for('admin.logout') }}">Sair</a>
+{% endblock %}
+
+{% block content %}
+  <h2>Bem-vindo, Admin</h2>
+  <p>Use o menu acima para gerenciar o sistema.</p>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Produto{% endblock %}
+
+{% block nav %}
+  <a href="{{ url_for('admin.listar_produtos') }}">Voltar</a>
+{% endblock %}
+
+{% block content %}
+  <h2>Cadastro / Edição de Produto</h2>
+
+  <form method="post">
+    {{ form.hidden_tag() }}
+
+    <div>
+      {{ form.nome.label }}<br>
+      {{ form.nome(size=32) }}
+    </div>
+
+    <div>
+      {{ form.descricao.label }}<br>
+      {{ form.descricao(size=64) }}
+    </div>
+
+    <div>
+      {{ form.preco_unit.label }}<br>
+      {{ form.preco_unit(step="0.01") }}
+    </div>
+
+    <div>
+      {{ form.estoque.label }}<br>
+      {{ form.estoque() }}
+    </div>
+        <div>
+      {{ form.imagem.label }}<br>
+      {{ form.imagem(size=200) }}
+    </div>
+
+    <div>
+      {{ form.submit() }}
+    </div>
+  </form>
+{% endblock %}

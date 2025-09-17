@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Clientes{% endblock %}
+
+{% block nav %}
+  <a href="{{ url_for('admin.dashboard') }}">Dashboard</a>
+  <a href="{{ url_for('admin.listar_produtos') }}">Produtos</a>
+  <a href="{{ url_for('admin.listar_vendas') }}">Vendas</a>
+  <a href="{{ url_for('admin.logout') }}">Sair</a>
+{% endblock %}
+
+{% block content %}
+  <h2>Clientes</h2>
+  <a href="{{ url_for('admin.novo_cliente') }}">Novo Cliente</a>
+
+  <form method="get">
+    <input type="text" name="search" placeholder="Buscar nome ou CPF" value="{{ request.args.get('search', '') }}">
+    <input type="submit" value="Buscar">
+  </form>
+
+  <table>
+    <tr>
+      <th>Nome</th>
+      <th>CPF</th>
+      <th>Ações</th>
+    </tr>
+    {% for c in clientes %}
+    <tr>
+      <td>{{ c.nome }}</td>
+      <td>{{ c.cpf }}</td>
+      <td>
+        <a href="{{ url_for('admin.editar_cliente', id=c.id) }}">Editar</a>
+        <form action="{{ url_for('admin.excluir_cliente', id=c.id) }}" method="post" style="display:inline;">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit">Excluir</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+{% endblock %}

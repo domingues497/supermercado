@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Vendas{% endblock %}
+
+{% block nav %}
+  <a href="{{ url_for('admin.dashboard') }}">Dashboard</a>
+  <a href="{{ url_for('admin.listar_produtos') }}">Produtos</a>
+  <a href="{{ url_for('admin.listar_clientes') }}">Clientes</a>
+  <a href="{{ url_for('admin.logout') }}">Sair</a>
+{% endblock %}
+
+{% block content %}
+  <h2>Vendas</h2>
+
+  <table>
+    <tr>
+      <th>ID</th>
+      <th>Cliente</th>
+      <th>Total</th>
+      <th>Data</th>
+      <th>Ações</th>
+    </tr>
+    {% for v in vendas %}
+    <tr>
+      <td>{{ v.id }}</td>
+      <td>{{ v.cliente.nome }}</td>
+      <td>R$ {{ "%.2f"|format(v.total) }}</td>
+      <td>{{ v.criado_em.strftime('%d/%m/%Y %H:%M') }}</td>
+      <td><a href="{{ url_for('admin.detalhe_venda', id=v.id) }}">Detalhe</a></td>
+    </tr>
+    {% endfor %}
+  </table>
+{% endblock %}

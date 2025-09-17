@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Nova Venda{% endblock %}
+
+{% block content %}
+<h2>Nova Venda</h2>
+
+<!-- Busca de produto -->
+<form method="post" action="{{ url_for('cliente.nova_venda') }}" class="busca-form">
+    <input type="text" name="search" placeholder="Buscar produto..." value="{{ request.form.get('search', '') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button type="submit">Buscar</button>
+</form>
+
+<div class="venda-layout">
+    <!-- Lista de produtos -->
+    <div class="produtos">
+        {% if produtos %}
+            <div class="grid-produtos">
+                {% for p in produtos %}
+                    <div class="produto-card">
+                        <h3>{{ p.nome }}</h3>
+                        <p>{{ p.descricao }}</p>
+                        <p><strong>R$ {{ "%.2f"|format(p.preco_unit) }}</strong></p>
+                        <form method="post" action="{{ url_for('cliente.carrinho_add') }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="hidden" name="produto_id" value="{{ p.id }}">
+                            <input type="number" name="quantidade" value="1" min="1">
+                            <button type="submit">Adicionar</button>
+                        </form>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>Nenhum produto encontrado.</p>
+        {% endif %}
+    </div>
+
+    <!-- Carrinho -->
+    <aside class="carrinho">
+        <h3>Meu Carrinho</h3>
+        {% if carrinho %}
+            <form method="post" action="{{ url_for('cliente.finalizar_venda') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <ul>
+                    {% for item in carrinho %}
+                        <li>
+                            {{ item.produto.nome }} ({{ item.quantidade }}) - 
+                            R$ {{ "%.2f"|format(item.subtotal) }}
+                            <form method="post" action="{{ url_for('cliente.carrinho_remove') }}" style="display:inline;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="produto_id" value="{{ item.produto.id }}">
+                                <button type="submit">Remover</button>
+                            </form>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <button type="submit">Finalizar Compra</button>
+            </form>
+        {% else %}
+            <p>Carrinho vazio.</p>
+        {% endif %}
+    </aside>
+</div>
+{% endblock %}

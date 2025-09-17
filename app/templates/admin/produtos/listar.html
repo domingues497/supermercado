@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Produtos{% endblock %}
+
+{% block nav %}
+  <a href="{{ url_for('admin.dashboard') }}">Dashboard</a>
+  <a href="{{ url_for('admin.listar_clientes') }}">Clientes</a>
+  <a href="{{ url_for('admin.listar_vendas') }}">Vendas</a>
+  <a href="{{ url_for('admin.logout') }}">Sair</a>
+{% endblock %}
+
+{% block content %}
+  <h2>Produtos</h2>
+  <a href="{{ url_for('admin.novo_produto') }}">Novo Produto</a>
+
+  <form method="get">
+    <input type="text" name="search" placeholder="Buscar..." value="{{ request.args.get('search', '') }}">
+    <input type="submit" value="Buscar">
+  </form>
+
+  <table>
+    <tr>
+      <th>Nome</th>
+      <th>Preço</th>
+      <th>Estoque</th>
+      <th>Ações</th>
+    </tr>
+    {% for p in produtos %}
+    <tr>
+      <td>{{ p.nome }}</td>
+      <td>R$ {{ "%.2f"|format(p.preco_unit) }}</td>
+      <td>{{ p.estoque }}</td>
+      <td>
+        <a href="{{ url_for('admin.editar_produto', id=p.id) }}">Editar</a>
+        <form action="{{ url_for('admin.excluir_produto', id=p.id) }}" method="post" style="display:inline;">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit">Excluir</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+{% endblock %}

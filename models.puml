@@ -1,0 +1,50 @@
+@startuml
+
+class Produto {
+  id : INTEGER
+  nome : VARCHAR(100)
+  descricao : TEXT
+  preco_unit : NUMERIC(10, 2)
+  estoque : INTEGER
+  imagem : VARCHAR(200)
+  criado_em : DATETIME
+  atualizado_em : DATETIME
+}
+
+class Cliente {
+  id : INTEGER
+  nome : VARCHAR(120)
+  cpf : VARCHAR(11)
+  senha_hash : VARCHAR(255)
+  criado_em : DATETIME
+  atualizado_em : DATETIME
+}
+
+class Venda {
+  id : INTEGER
+  cliente_id : INTEGER
+  criado_em : DATETIME
+  total : NUMERIC(10, 2)
+}
+
+class VendaItem {
+  id : INTEGER
+  venda_id : INTEGER
+  produto_id : INTEGER
+  quantidade : INTEGER
+  preco_unit : NUMERIC(10, 2)
+}
+
+class AdminUser {
+  id : INTEGER
+  email : VARCHAR(140)
+  senha_hash : VARCHAR(255)
+}
+
+Cliente "1" -- "N" Venda
+Venda "1" -- "1" Cliente
+Venda "1" -- "N" VendaItem
+VendaItem "1" -- "1" Venda
+VendaItem "1" -- "1" Produto
+
+@enduml

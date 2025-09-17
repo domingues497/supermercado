@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Recibo Venda #{{ venda.id }}{% endblock %}
+
+{% block content %}
+  <h2>Recibo da Compra</h2>
+  <p><strong>ID Venda:</strong> {{ venda.id }}</p>
+  <p><strong>Data:</strong> {{ venda.criado_em.strftime('%d/%m/%Y %H:%M') }}</p>
+  <p><strong>Total:</strong> R$ {{ "%.2f"|format(venda.total) }}</p>
+
+  <h3>Itens</h3>
+  <table>
+    <tr>
+      <th>Produto</th>
+      <th>Qtd</th>
+      <th>Preço Unit</th>
+      <th>Subtotal</th>
+    </tr>
+    {% for item in venda.itens %}
+    <tr>
+      <td>{{ item.produto.nome }}</td>
+      <td>{{ item.quantidade }}</td>
+      <td>R$ {{ "%.2f"|format(item.preco_unit) }}</td>
+      <td>R$ {{ "%.2f"|format(item.preco_unit * item.quantidade) }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+
+    <a href="{{ url_for('publico.landing') }}">Nova Compra</a>
+{% endblock %}

@@ -1,0 +1,240 @@
+/* Reset básico */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    background-color: #f9f9f9;
+    color: #333;
+    padding: 1rem;
+}
+
+header, footer {
+    background-color: #fff;
+    border-bottom: 1px solid #ddd;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+header h1 a {
+    text-decoration: none;
+    color: #0077cc;
+}
+
+nav a {
+    margin-right: 1rem;
+    text-decoration: none;
+    color: #0077cc;
+}
+
+nav a:hover {
+    text-decoration: underline;
+}
+
+main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 1rem;
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
+}
+
+form {
+    display: grid;
+    gap: 1rem;
+}
+
+label {
+    font-weight: bold;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+select,
+textarea {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+button,
+input[type="submit"] {
+    padding: 0.5rem 1rem;
+    background-color: #0077cc;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover,
+input[type="submit"]:hover {
+    background-color: #005fa3;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+table th,
+table td {
+    border: 1px solid #ddd;
+    padding: 0.5rem;
+    text-align: left;
+}
+
+table th {
+    background-color: #f2f2f2;
+}
+
+.flashes {
+    list-style: none;
+    margin-bottom: 1rem;
+    padding: 0;
+}
+
+.flash {
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    border-radius: 4px;
+}
+
+.flash.success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.flash.danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.flash.warning {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+/* Responsividade fluida */
+@media (max-width: 600px) {
+    nav a {
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+
+    form {
+        grid-template-columns: 1fr;
+    }
+}
+
+.grid-produtos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.produto-card {
+    background: #fff;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    text-align: center;
+    box-shadow: 0 0 5px rgba(0,0,0,0.05);
+}
+.produto-card h3 {
+    margin-bottom: 0.5rem;
+}
+.produto-card button {
+    margin-top: 0.5rem;
+}
+
+
+/* Layout da tela de venda */
+.venda-layout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+    margin-top: 1.5rem;
+}
+
+.busca-form {
+    margin-bottom: 1rem;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.grid-produtos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+}
+
+.produto-card {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 1rem;
+    background: #fafafa;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.produto-card h3 {
+    margin: 0 0 0.5rem 0;
+}
+
+.carrinho {
+    border: 2px solid #444;
+    border-radius: 6px;
+    padding: 1rem;
+    background: #fff;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.2);
+}
+
+.carrinho h3 {
+    margin-top: 0;
+}
+
+/* Container de ações (login/logout + admin) */
+.acoes {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    align-items: center;
+}
+
+.acoes a {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background-color: #2c3e50;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background-color 0.2s ease-in-out;
+    font-weight: bold;
+}
+
+.acoes a:hover {
+    background-color: #34495e;
+}
+
+.acoes p {
+    margin: 0;
+}
+
+.produto-img {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    display: block;
+    margin: 0 auto 10px;
+}
+
