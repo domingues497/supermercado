@@ -1,4 +1,4 @@
-# 🛒 Supermercado Delivery - Flask + PostgreSQL
+# Supermercado Delivery - Flask + PostgreSQL
 
 Sistema completo de delivery para supermercado com:
 
@@ -19,7 +19,7 @@ UI simples, moderna e sem JavaScript
 - Flask-WTF (formulários)
 - Flask-Login (sessões)
 - Flask-HTTPAuth (API REST)
-- HTML/CSS puro (sem JS)
+- HTML/CSS puro
 - `.env` com configurações sensíveis
 
 ---
@@ -27,7 +27,7 @@ UI simples, moderna e sem JavaScript
 ## Instalação
 
 ```bash
-
+Instalar PostgreSql no Windows e popular o Banco
 cd supermercado
 python -m venv venv
 source venv/bin/activate  # ou venv\Scripts\activate no Windows
