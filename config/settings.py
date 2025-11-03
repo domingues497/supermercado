@@ -53,6 +53,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'loja.middleware.IdleLogoutMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -139,3 +140,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Auth redirects
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/dashboard/'
+
+# Logout por inatividade (em segundos). Padrão: 15 minutos
+INACTIVITY_TIMEOUT_SECONDS = int(os.getenv('IDLE_TIMEOUT_SECONDS', '900'))
+
+# Grava sessão a cada requisição para manter estado atualizado
+SESSION_SAVE_EVERY_REQUEST = True

@@ -15,6 +15,7 @@
       <a href="/">Início</a>
       {% if request.user.is_authenticated %}
         <span>Olá, {{ request.user.first_name|default:request.user.username }}!</span>
+        <a href="{% url 'meus_pedidos' %}">Meus Pedidos</a>
         <a href="{% url 'logout' %}">Sair</a>
       {% else %}
         <a href="{% url 'login' %}">Login</a>
@@ -26,7 +27,7 @@
       {% endif %}
     </nav>
   </header>
-  <main>
+  <main class="container">
     {% if messages %}
     <div style="max-width:900px;margin:12px auto;padding:8px 12px;border:1px solid #ddd;border-radius:8px;background:#f9f9f9;">
       {% for message in messages %}
@@ -39,5 +40,23 @@
   <footer>
     Supermercado • Django
   </footer>
+  <script>
+    // Logout automático por inatividade no cliente (complementa o middleware)
+    (function() {
+      var TIMEOUT_MS = 15 * 60 * 1000; // 15 minutos
+      var timer;
+      var reset = function() {
+        clearTimeout(timer);
+        timer = setTimeout(function() {
+          // Redireciona para logout mantendo destino
+          window.location.href = "{% url 'logout' %}?next={{ request.path }}";
+        }, TIMEOUT_MS);
+      };
+      ['click','mousemove','keydown','touchstart','scroll'].forEach(function(evt) {
+        window.addEventListener(evt, reset, { passive: true });
+      });
+      reset();
+    })();
+  </script>
 </body>
 </html>

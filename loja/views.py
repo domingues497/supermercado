@@ -1,11 +1,16 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponseForbidden
+from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.urls import reverse
 from django.db import transaction
 from decimal import Decimal
+import json
+import re
+from urllib.request import urlopen
+from urllib.error import URLError
 from .models import Produto, Venda, VendaItem, Cliente
 from .forms import CadastroClienteForm, LoginForm
 
@@ -13,6 +18,70 @@ from .forms import CadastroClienteForm, LoginForm
 def home(request):
     produtos = Produto.objects.all().order_by('nome')
     return render(request, 'landing.html', { 'produtos': produtos })
+
+
+@login_required
+def meus_pedidos(request):
+    # Lista as vendas do usuário autenticado com seus itens
+    vendas = (
+        Venda.objects.filter(usuario=request.user)
+        .order_by('-criado_em')
+        .prefetch_related('itens', 'itens__produto')
+    )
+    return render(request, 'pedidos.html', { 'vendas': vendas })
+
+
+# --- CEP Lookup helpers ---
+def _fetch_cep_viacep(cep):
+    try:
+        with urlopen(f'https://viacep.com.br/ws/{cep}/json/', timeout=4) as resp:
+            data = json.loads(resp.read().decode('utf-8'))
+            if data.get('erro'):
+                return None
+            return {
+                'logradouro': data.get('logradouro', ''),
+                'bairro': data.get('bairro', ''),
+                'cidade': data.get('localidade', ''),
+                'estado': data.get('uf', ''),
+            }
+    except URLError:
+        return None
+    except Exception:
+        return None
+
+
+def _fetch_cep_brasilapi(cep):
+    try:
+        with urlopen(f'https://brasilapi.com.br/api/cep/v2/{cep}', timeout=4) as resp:
+            data = json.loads(resp.read().decode('utf-8'))
+            if 'message' in data:
+                return None
+            return {
+                'logradouro': data.get('street', ''),
+                'bairro': data.get('neighborhood', ''),
+                'cidade': data.get('city', ''),
+                'estado': data.get('state', ''),
+            }
+    except URLError:
+        return None
+    except Exception:
+        return None
+
+
+def buscar_cep(cep):
+    """Busca CEP com fallback entre ViaCEP e BrasilAPI."""
+    cep_digits = re.sub(r'\D', '', cep)
+    if len(cep_digits) != 8:
+        return None
+    return _fetch_cep_viacep(cep_digits) or _fetch_cep_brasilapi(cep_digits)
+
+
+def cep_lookup(request, cep):
+    """Endpoint JSON para buscar endereço por CEP."""
+    result = buscar_cep(cep)
+    if not result:
+        return JsonResponse({'error': 'CEP inválido ou não encontrado'}, status=404)
+    return JsonResponse({'cep': re.sub(r'\D', '', cep), **result})
 
 
 def cadastro_view(request):
@@ -78,9 +147,21 @@ def login_view(request):
                 login(request, user)
                 messages.success(request, f'Bem-vindo, {user.first_name or user.username}!')
                 
-                # Redireciona para onde estava tentando ir ou para home
-                next_url = request.GET.get('next', 'home')
-                return redirect(next_url)
+                # Redireciona para 'next' se presente
+                next_url = request.GET.get('next')
+                if next_url:
+                    return redirect(next_url)
+
+                # Se for admin/staff ou e-mail específico, leva para o Django Admin
+                try:
+                    user_email = (user.email or '').lower()
+                except Exception:
+                    user_email = ''
+                if user.is_superuser or user.is_staff or user_email == 'admin@supermercado.local':
+                    return redirect(reverse('admin:index'))
+
+                # Caso padrão: home
+                return redirect('home')
             else:
                 messages.error(request, 'Usuário ou senha incorretos.')
     else:
@@ -267,7 +348,8 @@ def carrinho_finalizar(request):
         return redirect(reverse('cadastro'))
 
     total = Decimal('0.00')
-    itens_validos = []
+    itens_validos = []  # (produto, qtd_int, preco, backorder)
+    itens_em_falta = []
     for pid_str, qtd in carrinho.items():
         try:
             produto = Produto.objects.get(id=int(pid_str))
@@ -278,31 +360,35 @@ def carrinho_finalizar(request):
             continue
         preco = Decimal(str(produto.preco_unit))
         subtotal = preco * qtd_int
-        # Valida estoque antes de prosseguir
-        if produto.estoque is not None and produto.estoque < qtd_int:
-            messages.error(request, f'Estoque insuficiente para "{produto.nome}". Disponível: {produto.estoque}, solicitado: {qtd_int}.')
-            return redirect(reverse('carrinho'))
+        # Se estoque for insuficiente, permite compra e marca para entrega posterior
+        backorder = produto.estoque < qtd_int
+        if backorder:
+            itens_em_falta.append(produto)
         total += subtotal
-        itens_validos.append((produto, qtd_int, preco))
+        itens_validos.append((produto, qtd_int, preco, backorder))
 
     venda = Venda.objects.create(
         usuario=request.user if request.user.is_authenticated else None,
         total=total
     )
-    for produto, qtd_int, preco in itens_validos:
+    for produto, qtd_int, preco, backorder in itens_validos:
         VendaItem.objects.create(
             venda=venda,
             produto=produto,
             quantidade=qtd_int,
-            preco_unit=preco
+            preco_unit=preco,
+            backorder=backorder
         )
-        # Decrementa estoque
+        # Decrementa estoque (não permitindo negativo)
         produto.estoque = max(0, (produto.estoque or 0) - qtd_int)
         produto.save(update_fields=['estoque'])
 
     # Limpa carrinho após finalizar
     request.session['carrinho'] = {}
     messages.success(request, 'Compra finalizada com sucesso!')
+    if itens_em_falta:
+        nomes = ', '.join(p.nome for p in itens_em_falta)
+        messages.warning(request, f'Os produtos {nomes} estão em falta e serão entregues posteriormente.')
     return redirect(reverse('home'))
 
 

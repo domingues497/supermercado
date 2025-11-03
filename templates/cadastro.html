@@ -153,6 +153,7 @@
                         <div class="error-list">{{ form.cpf.errors }}</div>
                     {% endif %}
                     <div class="help-text">Digite apenas números (será formatado automaticamente)</div>
+                    <div id="cpf-feedback" class="help-text" style="margin-top:4px;color:#666;">Digite um CPF válido.</div>
                 </div>
             </div>
             
@@ -171,6 +172,7 @@
                     {% if form.email.errors %}
                         <div class="error-list">{{ form.email.errors }}</div>
                     {% endif %}
+                    <div id="email-feedback" class="help-text" style="margin-top:4px;color:#666;">Digite um e-mail válido.</div>
                 </div>
             </div>
             
@@ -323,6 +325,21 @@
 document.addEventListener('DOMContentLoaded', function() {
     const cpfInput = document.getElementById('{{ form.cpf.id_for_label }}');
     if (cpfInput) {
+        const cpfFeedback = document.getElementById('cpf-feedback');
+        const validarCPF = (cpf) => {
+            const digits = cpf.replace(/\D/g, '');
+            if (digits.length !== 11) return false;
+            if (/^(\d)\1{10}$/.test(digits)) return false;
+            let soma = 0;
+            for (let i = 0; i < 9; i++) soma += parseInt(digits[i]) * (10 - i);
+            let resto = soma % 11;
+            let d1 = resto < 2 ? 0 : 11 - resto;
+            soma = 0;
+            for (let i = 0; i < 10; i++) soma += parseInt(digits[i]) * (11 - i);
+            resto = soma % 11;
+            let d2 = resto < 2 ? 0 : 11 - resto;
+            return digits[9] === String(d1) && digits[10] === String(d2);
+        };
         cpfInput.addEventListener('input', function(e) {
             let value = e.target.value.replace(/\D/g, '');
             if (value.length <= 11) {
@@ -330,6 +347,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 value = value.replace(/(\d{3})(\d)/, '$1.$2');
                 value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
                 e.target.value = value;
+            }
+            if (cpfFeedback) {
+                const ok = validarCPF(e.target.value);
+                cpfFeedback.textContent = ok ? 'CPF válido.' : 'CPF inválido.';
+                cpfFeedback.style.color = ok ? '#155724' : '#dc3545';
+            }
+        });
+        cpfInput.addEventListener('blur', function(e) {
+            if (cpfFeedback) {
+                const ok = validarCPF(e.target.value);
+                cpfFeedback.textContent = ok ? 'CPF válido.' : 'CPF inválido.';
+                cpfFeedback.style.color = ok ? '#155724' : '#dc3545';
             }
         });
     }
@@ -344,8 +373,53 @@ document.addEventListener('DOMContentLoaded', function() {
                 e.target.value = value;
             }
         });
+        cepInput.addEventListener('blur', async function(e) {
+            const digits = e.target.value.replace(/\D/g, '');
+            if (digits.length === 8) {
+                try {
+                    const resp = await fetch(`/api/cep/${digits}/`, { headers: { 'Accept': 'application/json' } });
+                    if (!resp.ok) throw new Error('CEP não encontrado');
+                    const data = await resp.json();
+                    const logradouro = document.getElementById('{{ form.logradouro.id_for_label }}');
+                    const bairro = document.getElementById('{{ form.bairro.id_for_label }}');
+                    const cidade = document.getElementById('{{ form.cidade.id_for_label }}');
+                    const estado = document.getElementById('{{ form.estado.id_for_label }}');
+                    if (logradouro && !logradouro.value) logradouro.value = data.logradouro || '';
+                    if (bairro && !bairro.value) bairro.value = data.bairro || '';
+                    if (cidade && !cidade.value) cidade.value = data.cidade || '';
+                    if (estado && !estado.value) estado.value = (data.estado || '').toUpperCase();
+                } catch (err) {
+                    console.warn('Falha ao buscar CEP:', err);
+                }
+            }
+        });
     }
     
+    // Validação de e-mail
+    const emailInput = document.getElementById('{{ form.email.id_for_label }}');
+    if (emailInput) {
+        const emailFeedback = document.getElementById('email-feedback');
+        const validarEmail = (email) => {
+            const value = (email || '').trim();
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+            return re.test(value);
+        };
+        const updateEmailFeedback = () => {
+            if (!emailFeedback) return;
+            const ok = validarEmail(emailInput.value);
+            if (emailInput.value.trim() === '') {
+                emailFeedback.textContent = 'Digite um e-mail válido.';
+                emailFeedback.style.color = '#666';
+                return;
+            }
+            emailFeedback.textContent = ok ? 'E-mail válido.' : 'E-mail inválido.';
+            emailFeedback.style.color = ok ? '#155724' : '#dc3545';
+        };
+        emailInput.addEventListener('input', updateEmailFeedback);
+        emailInput.addEventListener('blur', updateEmailFeedback);
+        updateEmailFeedback();
+    }
+
     // Máscara para telefones
     const celularInput = document.getElementById('{{ form.telefone_celular.id_for_label }}');
     if (celularInput) {

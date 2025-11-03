@@ -102,6 +102,7 @@ class VendaItem(models.Model):
     produto = models.ForeignKey(Produto, on_delete=models.PROTECT)
     quantidade = models.IntegerField()
     preco_unit = models.DecimalField(max_digits=10, decimal_places=2)
+    backorder = models.BooleanField(default=False)
 
     class Meta:
         constraints = [

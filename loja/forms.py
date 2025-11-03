@@ -173,8 +173,9 @@ class CadastroClienteForm(UserCreationForm):
         return cpf_limpo
 
     def clean_email(self):
-        email = self.cleaned_data.get('email')
-        if User.objects.filter(email=email).exists():
+        email = (self.cleaned_data.get('email') or '').strip()
+        # Unicidade case-insensitive
+        if User.objects.filter(email__iexact=email).exists():
             raise forms.ValidationError("Este e-mail já está cadastrado.")
         return email
 

@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}Meus Pedidos{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="card">
+    <h2>Meus Pedidos</h2>
+    {% if vendas %}
+      <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:12px;">
+        {% for venda in vendas %}
+          <li class="card" style="padding:12px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+              <div>
+                <strong>Pedido #{{ venda.id }}</strong>
+                <span style="color:#666;margin-left:8px;">{{ venda.criado_em|date:"d/m/Y H:i" }}</span>
+              </div>
+              <div>
+                <strong>Total:</strong> R$ {{ venda.total|floatformat:2 }}
+              </div>
+            </div>
+            <div class="table-responsive" style="margin-top:8px;">
+              <table style="width:100%;border-collapse:collapse;">
+                <thead>
+                  <tr>
+                    <th style="text-align:left;padding:6px;border-bottom:1px solid #eee;">Produto</th>
+                    <th style="text-align:center;padding:6px;border-bottom:1px solid #eee;">Qtd</th>
+                    <th style="text-align:right;padding:6px;border-bottom:1px solid #eee;">Preço</th>
+                    <th style="text-align:right;padding:6px;border-bottom:1px solid #eee;">Subtotal</th>
+                    <th style="text-align:center;padding:6px;border-bottom:1px solid #eee;">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for item in venda.itens.all %}
+                  <tr>
+                    <td style="padding:6px;">{{ item.produto.nome }}</td>
+                    <td style="padding:6px;text-align:center;">{{ item.quantidade }}</td>
+                    <td style="padding:6px;text-align:right;">R$ {{ item.preco_unit|floatformat:2 }}</td>
+                    <td style="padding:6px;text-align:right;">R$ {{ item.subtotal|floatformat:2 }}</td>
+                    <td style="padding:6px;text-align:center;">
+                      {% if item.backorder %}
+                        <span style="display:inline-block;padding:4px 8px;border-radius:12px;background:#fff3cd;color:#856404;border:1px solid #ffeeba;">Entrega posterior</span>
+                      {% else %}
+                        <span style="display:inline-block;padding:4px 8px;border-radius:12px;background:#e2f0d9;color:#155724;border:1px solid #c3e6cb;">Entregue no prazo</span>
+                      {% endif %}
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>Você ainda não tem pedidos.</p>
+    {% endif %}
+    <div style="margin-top:12px;">
+      <a class="btn" href="{% url 'home' %}">Voltar à Home</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

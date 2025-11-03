@@ -3,6 +3,8 @@ from . import views
 
 urlpatterns = [
     path('', views.home, name='home'),
+    path('pedidos/', views.meus_pedidos, name='meus_pedidos'),
+    path('api/cep/<str:cep>/', views.cep_lookup, name='cep_lookup'),
     path('cadastro/', views.cadastro_view, name='cadastro'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
