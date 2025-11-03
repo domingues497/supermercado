@@ -26,15 +26,27 @@
     </ul>
     <p><strong>Total: R$ {{ total|floatformat:2 }}</strong></p>
     <div style="margin-top: 12px;display:flex;gap:8px;flex-wrap:wrap;">
-      <form method="post" action="{% url 'carrinho_finalizar' %}">
-        {% csrf_token %}
-        <button class="btn" type="submit">Finalizar</button>
-      </form>
+      {% if request.user.is_authenticated %}
+        <form method="post" action="{% url 'carrinho_finalizar' %}">
+          {% csrf_token %}
+          <button class="btn" type="submit">Finalizar Compra</button>
+        </form>
+      {% else %}
+        <div style="padding: 12px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; margin-bottom: 12px;">
+          <p style="margin: 0 0 8px 0; color: #495057;">
+            <strong>Para finalizar sua compra, você precisa estar logado.</strong>
+          </p>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <a class="btn" href="{% url 'login' %}?next={% url 'carrinho' %}" style="background: #007bff;">Fazer Login</a>
+            <a class="btn" href="{% url 'cadastro' %}" style="background: #28a745;">Criar Conta</a>
+          </div>
+        </div>
+      {% endif %}
       <form method="post" action="{% url 'carrinho_limpar' %}">
         {% csrf_token %}
-        <button class="btn" type="submit">Limpar</button>
+        <button class="btn" type="submit">Limpar Carrinho</button>
       </form>
-      <a class="btn" href="{% url 'home' %}">Continuar comprando</a>
+      <a class="btn" href="{% url 'home' %}">Continuar Comprando</a>
     </div>
   {% else %}
     <p>Seu carrinho está vazio por enquanto.</p>

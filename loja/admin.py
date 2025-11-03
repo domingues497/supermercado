@@ -84,9 +84,14 @@ class VendaItemAdmin(admin.ModelAdmin):
 
 @admin.register(Cliente)
 class ClienteAdmin(admin.ModelAdmin):
-    list_display = ("id", "nome", "email", "telefone", "usuario", "criado_em")
-    search_fields = ("nome", "email", "telefone", "documento")
-    list_filter = ("criado_em", "atualizado_em")
-    readonly_fields = ("criado_em", "atualizado_em")
-    ordering = ("nome",)
+    list_display = ("id", "get_nome", "cpf_formatado", "telefone_celular", "cidade", "estado", "criado_em")
+    search_fields = ("usuario__first_name", "usuario__email", "cpf", "telefone_celular", "cidade")
+    list_filter = ("estado", "preferencia_contato", "criado_em", "atualizado_em")
+    readonly_fields = ("criado_em", "atualizado_em", "cpf_formatado", "cep_formatado", "endereco_completo")
+    ordering = ("usuario__first_name",)
     list_per_page = 25
+    
+    def get_nome(self, obj):
+        return obj.usuario.first_name
+    get_nome.short_description = "Nome"
+    get_nome.admin_order_field = "usuario__first_name"

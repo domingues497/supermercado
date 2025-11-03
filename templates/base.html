@@ -13,8 +13,14 @@
   <header>
     <nav>
       <a href="/">Início</a>
-      <a href="/login/">Login</a>
-      <a href="/carrinho/">Carrinho</a>
+      {% if request.user.is_authenticated %}
+        <span>Olá, {{ request.user.first_name|default:request.user.username }}!</span>
+        <a href="{% url 'logout' %}">Sair</a>
+      {% else %}
+        <a href="{% url 'login' %}">Login</a>
+        <a href="{% url 'cadastro' %}">Cadastro</a>
+      {% endif %}
+      <a href="{% url 'carrinho' %}">Carrinho</a>
       {% if request.user.is_authenticated and request.user.is_staff %}
       <a href="{% url 'dashboard' %}">Dashboard</a>
       {% endif %}

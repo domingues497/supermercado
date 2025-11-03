@@ -1,22 +1,164 @@
 {% extends 'base.html' %}
-{% block title %}Login{% endblock %}
+{% block title %}Login • Supermercado{% endblock %}
+
+{% block head %}
+<style>
+.login-container {
+    max-width: 400px;
+    margin: 40px auto;
+    padding: 30px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.login-header h2 {
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.login-header p {
+    color: #666;
+    font-size: 14px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: #333;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+}
+
+.btn-login {
+    width: 100%;
+    background: #007bff;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-login:hover {
+    background: #0056b3;
+}
+
+.login-footer {
+    text-align: center;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.login-footer p {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.btn-register {
+    background: #28a745;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.btn-register:hover {
+    background: #1e7e34;
+    color: white;
+}
+
+.error-list {
+    color: #dc3545;
+    font-size: 14px;
+    margin-top: 6px;
+}
+
+.error-list ul {
+    margin: 0;
+    padding-left: 16px;
+}
+
+@media (max-width: 480px) {
+    .login-container {
+        margin: 20px 10px;
+        padding: 20px;
+    }
+}
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="card">
-  <h2>Login</h2>
-  <p style="margin-bottom: 12px;">Acesse sua conta para continuar.</p>
-  <form method="post" action="#">
-    {% csrf_token %}
-    <div>
-      <label for="id_username">Usuário</label>
-      <input id="id_username" name="username" type="text" placeholder="seu@email.com" />
+<div class="login-container">
+    <div class="login-header">
+        <h2>Entrar na Conta</h2>
+        <p>Digite suas credenciais para acessar sua conta</p>
     </div>
-    <div>
-      <label for="id_password">Senha</label>
-      <input id="id_password" name="password" type="password" placeholder="••••••" />
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+            {{ form.username }}
+            {% if form.username.errors %}
+                <div class="error-list">{{ form.username.errors }}</div>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            <label for="{{ form.password.id_for_label }}">{{ form.password.label }}</label>
+            {{ form.password }}
+            {% if form.password.errors %}
+                <div class="error-list">{{ form.password.errors }}</div>
+            {% endif %}
+        </div>
+        
+        {% if form.non_field_errors %}
+            <div class="error-list" style="margin-bottom: 16px;">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+        
+        <button type="submit" class="btn-login">Entrar</button>
+    </form>
+    
+    <div class="login-footer">
+        <p>Ainda não tem uma conta?</p>
+        <a href="{% url 'cadastro' %}" class="btn-register">Criar Conta</a>
     </div>
-    <div>
-      <input type="submit" class="btn" value="Entrar" />
-    </div>
-  </form>
 </div>
 {% endblock %}
