@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.safestring import mark_safe
 from decimal import Decimal
-from .models import Produto, Venda, VendaItem
+from .models import Produto, Venda, VendaItem, Cliente
 
 @admin.register(Produto)
 class ProdutoAdmin(admin.ModelAdmin):
@@ -26,9 +26,14 @@ class ProdutoAdmin(admin.ModelAdmin):
 
 @admin.register(Venda)
 class VendaAdmin(admin.ModelAdmin):
-    list_display = ("id", "usuario", "total", "criado_em")
+    list_display = ("id", "usuario", "total", "criado_em", "qtd_itens")
     date_hierarchy = "criado_em"
     readonly_fields = ("criado_em", "total")
+    list_filter = ("usuario", "criado_em")
+    search_fields = ("id", "usuario__username")
+    ordering = ("-criado_em",)
+    list_per_page = 25
+    actions = ["exportar_csv"]
 
     class VendaItemInline(admin.TabularInline):
         model = VendaItem
@@ -49,7 +54,39 @@ class VendaAdmin(admin.ModelAdmin):
         venda.save(update_fields=['total'])
         return instances
 
+    def qtd_itens(self, obj):
+        return obj.itens.count()
+    qtd_itens.short_description = "Itens"
+
+    def exportar_csv(self, request, queryset):
+        import csv
+        from django.http import HttpResponse
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="vendas.csv"'
+        writer = csv.writer(response)
+        writer.writerow(["id", "usuario", "total", "criado_em", "qtd_itens"]) 
+        for venda in queryset.order_by('id'):
+            writer.writerow([
+                venda.id,
+                venda.usuario.username if venda.usuario else "",
+                str(venda.total),
+                venda.criado_em.isoformat(),
+                venda.itens.count(),
+            ])
+        return response
+    exportar_csv.short_description = "Exportar vendas selecionadas para CSV"
+
 
 @admin.register(VendaItem)
 class VendaItemAdmin(admin.ModelAdmin):
     list_display = ("id", "venda", "produto", "quantidade", "preco_unit")
+
+
+@admin.register(Cliente)
+class ClienteAdmin(admin.ModelAdmin):
+    list_display = ("id", "nome", "email", "telefone", "usuario", "criado_em")
+    search_fields = ("nome", "email", "telefone", "documento")
+    list_filter = ("criado_em", "atualizado_em")
+    readonly_fields = ("criado_em", "atualizado_em")
+    ordering = ("nome",)
+    list_per_page = 25
