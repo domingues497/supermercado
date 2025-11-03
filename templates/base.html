@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}Supermercado{% endblock %}</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/modern-css-reset/dist/reset.min.css" />
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background: #f7f7f8; color: #222; }
+    header { padding: 16px 24px; background: #0d6efd; color: #fff; }
+    main { max-width: 960px; margin: 24px auto; padding: 0 16px; }
+    footer { text-align: center; padding: 24px; color: #666; }
+    a { color: #0d6efd; text-decoration: none; }
+    nav a { margin-right: 12px; color: #fff; }
+    .card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  </style>
+  {% block head %}{% endblock %}
+  {% load static %}
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="/">Início</a>
+      <a href="/login/">Login</a>
+      <a href="/carrinho/">Carrinho</a>
+    </nav>
+  </header>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+  <footer>
+    Supermercado • Django
+  </footer>
+</body>
+</html>
