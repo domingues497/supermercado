@@ -11,6 +11,7 @@ class ProdutoAdmin(admin.ModelAdmin):
     readonly_fields = ("criado_em", "atualizado_em")
     ordering = ("nome",)
     list_per_page = 25
+    actions = ["zerar_estoque"]
 
     def imagem_preview(self, obj):
         if obj.imagem:
@@ -18,12 +19,16 @@ class ProdutoAdmin(admin.ModelAdmin):
         return "—"
     imagem_preview.short_description = "Imagem"
 
+    def zerar_estoque(self, request, queryset):
+        queryset.update(estoque=0)
+    zerar_estoque.short_description = "Zerar estoque selecionado"
+
 
 @admin.register(Venda)
 class VendaAdmin(admin.ModelAdmin):
     list_display = ("id", "usuario", "total", "criado_em")
     date_hierarchy = "criado_em"
-    readonly_fields = ("criado_em", "atualizado_em", "total")
+    readonly_fields = ("criado_em", "total")
 
     class VendaItemInline(admin.TabularInline):
         model = VendaItem
@@ -38,7 +43,7 @@ class VendaAdmin(admin.ModelAdmin):
         venda = form.instance
         # Recalcula total baseado nos itens atuais
         total = Decimal('0.00')
-        for item in venda.vendaitem_set.all():
+        for item in venda.itens.all():
             total += (item.preco_unit or Decimal('0.00')) * (item.quantidade or 0)
         venda.total = total
         venda.save(update_fields=['total'])
@@ -48,10 +53,3 @@ class VendaAdmin(admin.ModelAdmin):
 @admin.register(VendaItem)
 class VendaItemAdmin(admin.ModelAdmin):
     list_display = ("id", "venda", "produto", "quantidade", "preco_unit")
-
-    # Ação em massa no Produto para zerar estoque
-    def zerar_estoque(self, request, queryset):
-        queryset.update(estoque=0)
-    zerar_estoque.short_description = "Zerar estoque selecionado"
-
-ProdutoAdmin.actions = ["zerar_estoque"]
