@@ -1,4 +1,4 @@
-# Supermercado Delivery - Flask + PostgreSQL
+# Supermercado Delivery - Django + PostgreSQL
 
 Sistema completo de delivery para supermercado com:
 
@@ -61,5 +61,5 @@ criar superusuário
 - Execute: python manage.py createsuperuser
 - Preencha os prompts: username , email e password (
 - Usuário: admin
-- Email: admin@supermercado.local
-- Senha: Admin@2025!
+- Email: admin@supermercado.local/ teste123@
+- Senha: Admin@2025! /asdf123@
