@@ -26,8 +26,11 @@ UI simples, moderna e sem JavaScript
 
 ## Instalação
 
-```bash
+
 Instalar PostgreSql no Windows e popular o Banco
+https://www.enterprisedb.com/downloads/postgres-postgresql-downloads
+Criar uma pasta chamado Supermercado 
+mkdir supermercado
 cd supermercado
 python -m venv venv
 source venv/bin/activate  # ou venv\Scripts\activate no Windows
