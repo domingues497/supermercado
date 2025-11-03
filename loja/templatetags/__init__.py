@@ -1,0 +1,1 @@
+# vazio, necessário para o Django reconhecer o pacote templatetags

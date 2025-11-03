@@ -1,8 +1,46 @@
 {% extends 'base.html' %}
 {% block title %}Carrinho{% endblock %}
+{# removido load de currency: usando floatformat padrão #}
 {% block content %}
 <div class="card">
   <h2>Carrinho</h2>
-  <p>Conteúdo do carrinho será migrado do Flask.</p>
+  {% if itens %}
+    <ul>
+      {% for item in itens %}
+        <li style="margin:6px 0;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span><strong>{{ item.produto.nome }}</strong></span>
+          <span>Estoque: {{ item.produto.estoque }}</span>
+          <form method="post" action="{% url 'carrinho_atualizar' item.produto.id %}" style="display:inline-flex;align-items:center;gap:6px;">
+            {% csrf_token %}
+            <label for="q{{ item.produto.id }}">Qtd:</label>
+            <input id="q{{ item.produto.id }}" type="number" name="quantidade" min="1" value="{{ item.quantidade }}" style="width:80px;padding:4px;" />
+            <button class="btn" type="submit">Atualizar</button>
+          </form>
+          <span>Subtotal: R$ {{ item.subtotal|floatformat:2 }}</span>
+          <form method="post" action="{% url 'carrinho_remover' item.produto.id %}" style="display:inline-block;margin-left:8px;">
+            {% csrf_token %}
+            <button class="btn" type="submit">Remover</button>
+          </form>
+        </li>
+      {% endfor %}
+    </ul>
+    <p><strong>Total: R$ {{ total|floatformat:2 }}</strong></p>
+    <div style="margin-top: 12px;display:flex;gap:8px;flex-wrap:wrap;">
+      <form method="post" action="{% url 'carrinho_finalizar' %}">
+        {% csrf_token %}
+        <button class="btn" type="submit">Finalizar</button>
+      </form>
+      <form method="post" action="{% url 'carrinho_limpar' %}">
+        {% csrf_token %}
+        <button class="btn" type="submit">Limpar</button>
+      </form>
+      <a class="btn" href="{% url 'home' %}">Continuar comprando</a>
+    </div>
+  {% else %}
+    <p>Seu carrinho está vazio por enquanto.</p>
+    <div style="margin-top: 12px;">
+      <a class="btn" href="{% url 'home' %}">Ir às compras</a>
+    </div>
+  {% endif %}
 </div>
 {% endblock %}

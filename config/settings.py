@@ -85,6 +85,14 @@ DATABASES = {
     )
 }
 
+# Configura o schema dedicado usando search_path, se DB_SCHEMA estiver definido
+DB_SCHEMA = os.getenv('DB_SCHEMA')
+if DB_SCHEMA:
+    db_default = DATABASES['default']
+    options = db_default.get('OPTIONS', {})
+    options['options'] = f'-c search_path={DB_SCHEMA},public'
+    db_default['OPTIONS'] = options
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -127,3 +135,7 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Auth redirects
+LOGIN_URL = '/admin/login/'
+LOGIN_REDIRECT_URL = '/dashboard/'

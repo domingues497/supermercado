@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="card">
+    <h2>Painel de Controle</h2>
+    <p>Bem-vindo, {{ request.user.get_username }}.</p>
+    <div class="grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;">
+      <div class="card">
+        <h3>Usuários</h3>
+        <p><strong>{{ stats.usuarios }}</strong></p>
+      </div>
+      <div class="card">
+        <h3>Pedidos</h3>
+        <p><strong>{{ stats.pedidos }}</strong></p>
+      </div>
+      <div class="card">
+        <h3>Receita</h3>
+        <p><strong>R$ {{ stats.receita }}</strong></p>
+      </div>
+    </div>
+    <div style="margin-top:1rem;">
+      <a class="btn" href="{% url 'home' %}">Voltar à Home</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

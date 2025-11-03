@@ -3,6 +3,20 @@
 {% block content %}
 <div class="card">
   <h2>Login</h2>
-  <p>Formulário de login será migrado do Flask.</p>
+  <p style="margin-bottom: 12px;">Acesse sua conta para continuar.</p>
+  <form method="post" action="#">
+    {% csrf_token %}
+    <div>
+      <label for="id_username">Usuário</label>
+      <input id="id_username" name="username" type="text" placeholder="seu@email.com" />
+    </div>
+    <div>
+      <label for="id_password">Senha</label>
+      <input id="id_password" name="password" type="password" placeholder="••••••" />
+    </div>
+    <div>
+      <input type="submit" class="btn" value="Entrar" />
+    </div>
+  </form>
 </div>
 {% endblock %}
