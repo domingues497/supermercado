@@ -2,6 +2,86 @@
 {% block title %}Carrinho{% endblock %}
 {# removido load de currency: usando floatformat padrão #}
 {% block content %}
+<style>
+  /* Overlay de processamento */
+  #checkout-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+  }
+  .overlay-card {
+    background: #fff;
+    color: #333;
+    padding: 16px 20px;
+    border-radius: 8px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    min-width: 280px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  /* Ícone de ampulheta em CSS (animado) */
+  .hourglass-css {
+    width: 22px; height: 28px; position: relative;
+    display: inline-block;
+  }
+  .hourglass-css::before,
+  .hourglass-css::after {
+    content: ""; position: absolute; left: 50%; transform: translateX(-50%);
+    width: 18px; height: 10px; border: 2px solid #007bff; border-radius: 4px;
+  }
+  .hourglass-css::before { top: 0; border-bottom: none; }
+  .hourglass-css::after { bottom: 0; border-top: none; }
+  .hourglass-sand {
+    position: absolute; left: 50%; transform: translateX(-50%);
+    width: 0; height: 0; border-left: 9px solid transparent; border-right: 9px solid transparent;
+    animation: sand-flow 1.4s linear infinite;
+  }
+  @keyframes sand-flow {
+    0%   { top: 9px; border-top: 10px solid #007bff; border-bottom: 0 solid transparent; opacity: 0.95; }
+    50%  { top: 14px; border-top: 5px solid #007bff; border-bottom: 5px solid #007bff; opacity: 1; }
+    100% { top: 19px; border-top: 0 solid transparent; border-bottom: 10px solid #007bff; opacity: 0.95; }
+  }
+</style>
+
+<!-- Overlay aguardando confirmação do cartão -->
+<div id="checkout-overlay" role="dialog" aria-live="assertive" aria-label="Aguardando confirmação do cartão">
+  <div class="overlay-card">
+    <div class="hourglass-css" aria-hidden="true">
+      <div class="hourglass-sand"></div>
+    </div>
+    <div>
+      <strong id="checkout-status">Processando pagamento…</strong>
+      <div style="font-size: 12px; color:#666;">Não feche esta janela.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Fallback estático quando JavaScript está desativado -->
+<noscript>
+  <style>
+    #checkout-overlay-noscript {
+      position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.5); z-index: 9999;
+    }
+    #checkout-overlay-noscript .overlay-card { background:#fff; color:#333; padding:16px 20px; border-radius:8px; box-shadow:0 6px 20px rgba(0,0,0,0.25); min-width:280px; display:flex; align-items:center; gap:12px; }
+  </style>
+  <div id="checkout-overlay-noscript" aria-label="Aguardando confirmação do cartão">
+    <div class="overlay-card">
+      <div class="hourglass-css" aria-hidden="true">
+        <div class="hourglass-sand"></div>
+      </div>
+      <div>
+        <strong>Processando pagamento…</strong>
+        <div style="font-size:12px;color:#666;">Seu pagamento está sendo confirmado. Você será redirecionado.</div>
+      </div>
+    </div>
+  </div>
+</noscript>
 <div class="card">
   <h2>Carrinho</h2>
   {% if itens %}
@@ -27,9 +107,9 @@
     <p><strong>Total: R$ {{ total|floatformat:2 }}</strong></p>
     <div style="margin-top: 12px;display:flex;gap:8px;flex-wrap:wrap;">
       {% if request.user.is_authenticated %}
-        <form method="post" action="{% url 'carrinho_finalizar' %}">
+        <form id="finalizar-form" method="post" action="{% url 'carrinho_finalizar' %}">
           {% csrf_token %}
-          <button class="btn" type="submit">Finalizar Compra</button>
+          <button id="finalizar-btn" class="btn" type="submit">Finalizar Compra</button>
         </form>
       {% else %}
         <div style="padding: 12px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; margin-bottom: 12px;">
@@ -55,4 +135,85 @@
     </div>
   {% endif %}
 </div>
+<script>
+  (function(){
+    const form = document.getElementById('finalizar-form');
+    if (!form) return;
+    const btn = document.getElementById('finalizar-btn');
+    const overlay = document.getElementById('checkout-overlay');
+    let submitting = false;
+
+    function showOverlay(){
+      if (!overlay) return;
+      overlay.style.display = 'flex';
+    }
+
+    if (btn) {
+      btn.addEventListener('click', function(evt){
+        if (submitting) {
+          evt.preventDefault();
+          return;
+        }
+        submitting = true;
+        evt.preventDefault();
+        btn.setAttribute('aria-busy','true');
+        btn.setAttribute('disabled','disabled');
+        btn.textContent = 'Autorizando…';
+        btn.style.opacity = '0.9';
+        showOverlay();
+        // Sequência temporizada: 4s “Autorizando…”, 2s “Confirmando…”, 2s “Processando pagamento…”, 1s “Pagamento OK!”
+        var totalDelay = 9000; // 4 + 2 + 2 + 1 segundos
+        // Alterna mensagens durante o processamento
+        const statusEl = document.getElementById('checkout-status');
+        if (statusEl) {
+          statusEl.textContent = 'Autorizando…';
+          setTimeout(function(){ statusEl.textContent = 'Confirmando…'; }, 4000);
+          setTimeout(function(){ statusEl.textContent = 'Processando pagamento…'; }, 6000);
+          setTimeout(function(){ statusEl.textContent = 'Pagamento OK!'; }, 8000);
+        }
+        // Sincroniza também no texto do botão para maior visibilidade
+        setTimeout(function(){ btn.textContent = 'Confirmando…'; }, 4000);
+        setTimeout(function(){ btn.textContent = 'Processando pagamento…'; }, 6000);
+        setTimeout(function(){ btn.textContent = 'Pagamento OK!'; }, 8000);
+        setTimeout(function(){
+          try { form.submit(); } catch(e) { /* fallback */ window.location.href = form.action; }
+        }, totalDelay);
+      });
+    }
+
+    // Fallback para Enter (submit do formulário)
+    form.addEventListener('submit', function(evt){
+      if (submitting) {
+        evt.preventDefault();
+        return;
+      }
+      submitting = true;
+      evt.preventDefault();
+      if (btn) {
+        btn.setAttribute('aria-busy','true');
+        btn.setAttribute('disabled','disabled');
+        btn.textContent = 'Autorizando…';
+        btn.style.opacity = '0.9';
+      }
+      showOverlay();
+      var totalDelay = 9000; // 4 + 2 + 2 + 1 segundos
+      const statusEl = document.getElementById('checkout-status');
+      if (statusEl) {
+        statusEl.textContent = 'Autorizando…';
+        setTimeout(function(){ statusEl.textContent = 'Confirmando…'; }, 4000);
+        setTimeout(function(){ statusEl.textContent = 'Processando pagamento…'; }, 6000);
+        setTimeout(function(){ statusEl.textContent = 'Pagamento OK!'; }, 8000);
+      }
+      // Sincroniza também no texto do botão
+      if (btn) {
+        setTimeout(function(){ btn.textContent = 'Confirmando…'; }, 4000);
+        setTimeout(function(){ btn.textContent = 'Processando pagamento…'; }, 6000);
+        setTimeout(function(){ btn.textContent = 'Pagamento OK!'; }, 8000);
+      }
+      setTimeout(function(){
+        try { form.submit(); } catch(e) { /* fallback */ window.location.href = form.action; }
+      }, totalDelay);
+    });
+  })();
+</script>
 {% endblock %}
