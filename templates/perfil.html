@@ -1,0 +1,237 @@
+{% extends 'base.html' %}
+{% block title %}Meu Perfil • Supermercado{% endblock %}
+
+{% block head %}
+<style>
+.form-container { max-width: 700px; margin: 20px auto; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+.form-group { margin-bottom: 16px; }
+.form-row { display: flex; gap: 16px; }
+.form-row .form-group { flex: 1; }
+.form-section { margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #eee; }
+.btn-primary { background: #007bff; color: #fff; padding: 12px 24px; border: none; border-radius: 4px; cursor: pointer; width: 100%; }
+.btn-danger { background: #dc3545; color: #fff; padding: 10px 16px; border: none; border-radius: 4px; text-decoration: none; display: inline-block; margin-top: 12px; }
+.error-list { color: #dc3545; font-size: 14px; margin-top: 4px; }
+@media (max-width: 768px) { .form-row { flex-direction: column; gap: 0; } .form-container { margin: 10px; padding: 16px; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+  <h2>Meu Perfil</h2>
+  <p>Edite seus dados de conta e endereço.</p>
+  <form method="post">
+    {% csrf_token %}
+    {% if user_form.non_field_errors %}
+      <div class="error-list">{{ user_form.non_field_errors }}</div>
+    {% endif %}
+    {% if cliente_form.non_field_errors %}
+      <div class="error-list">{{ cliente_form.non_field_errors }}</div>
+    {% endif %}
+
+    <div class="form-section">
+      <h3>Conta</h3>
+      <div class="form-group">
+        <label for="{{ user_form.username.id_for_label }}">{{ user_form.username.label }}</label>
+        {{ user_form.username }}
+        {% if user_form.username.errors %}<div class="error-list">{{ user_form.username.errors }}</div>{% endif %}
+      </div>
+      <div class="form-group">
+        <label for="{{ user_form.first_name.id_for_label }}">{{ user_form.first_name.label }}</label>
+        {{ user_form.first_name }}
+        {% if user_form.first_name.errors %}<div class="error-list">{{ user_form.first_name.errors }}</div>{% endif %}
+      </div>
+      <div class="form-group">
+        <label for="{{ user_form.email.id_for_label }}">{{ user_form.email.label }}</label>
+        {{ user_form.email }}
+        {% if user_form.email.errors %}<div class="error-list">{{ user_form.email.errors }}</div>{% endif %}
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3>Dados Pessoais e Endereço</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="{{ cliente_form.cpf.id_for_label }}">{{ cliente_form.cpf.label }}</label>
+          {{ cliente_form.cpf }}
+          {% if cliente_form.cpf.errors %}<div class="error-list">{{ cliente_form.cpf.errors }}</div>{% endif %}
+        </div>
+        <div class="form-group">
+          <label for="{{ cliente_form.data_nascimento.id_for_label }}">{{ cliente_form.data_nascimento.label }}</label>
+          {{ cliente_form.data_nascimento }}
+          {% if cliente_form.data_nascimento.errors %}<div class="error-list">{{ cliente_form.data_nascimento.errors }}</div>{% endif %}
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="{{ cliente_form.cep.id_for_label }}">{{ cliente_form.cep.label }}</label>
+          {{ cliente_form.cep }}
+          {% if cliente_form.cep.errors %}<div class="error-list">{{ cliente_form.cep.errors }}</div>{% endif %}
+        </div>
+        <div class="form-group">
+          <label for="{{ cliente_form.logradouro.id_for_label }}">{{ cliente_form.logradouro.label }}</label>
+          {{ cliente_form.logradouro }}
+          {% if cliente_form.logradouro.errors %}<div class="error-list">{{ cliente_form.logradouro.errors }}</div>{% endif %}
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="{{ cliente_form.numero.id_for_label }}">{{ cliente_form.numero.label }}</label>
+          {{ cliente_form.numero }}
+          {% if cliente_form.numero.errors %}<div class="error-list">{{ cliente_form.numero.errors }}</div>{% endif %}
+        </div>
+        <div class="form-group">
+          <label for="{{ cliente_form.complemento.id_for_label }}">{{ cliente_form.complemento.label }}</label>
+          {{ cliente_form.complemento }}
+          {% if cliente_form.complemento.errors %}<div class="error-list">{{ cliente_form.complemento.errors }}</div>{% endif %}
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="{{ cliente_form.bairro.id_for_label }}">{{ cliente_form.bairro.label }}</label>
+          {{ cliente_form.bairro }}
+          {% if cliente_form.bairro.errors %}<div class="error-list">{{ cliente_form.bairro.errors }}</div>{% endif %}
+        </div>
+        <div class="form-group">
+          <label for="{{ cliente_form.cidade.id_for_label }}">{{ cliente_form.cidade.label }}</label>
+          {{ cliente_form.cidade }}
+          {% if cliente_form.cidade.errors %}<div class="error-list">{{ cliente_form.cidade.errors }}</div>{% endif %}
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="{{ cliente_form.estado.id_for_label }}">{{ cliente_form.estado.label }}</label>
+          {{ cliente_form.estado }}
+          {% if cliente_form.estado.errors %}<div class="error-list">{{ cliente_form.estado.errors }}</div>{% endif %}
+        </div>
+        <div class="form-group">
+          <label for="{{ cliente_form.pais.id_for_label }}">{{ cliente_form.pais.label }}</label>
+          {{ cliente_form.pais }}
+          {% if cliente_form.pais.errors %}<div class="error-list">{{ cliente_form.pais.errors }}</div>{% endif %}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="{{ cliente_form.ponto_referencia.id_for_label }}">{{ cliente_form.ponto_referencia.label }}</label>
+        {{ cliente_form.ponto_referencia }}
+        {% if cliente_form.ponto_referencia.errors %}<div class="error-list">{{ cliente_form.ponto_referencia.errors }}</div>{% endif %}
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3>Contatos</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="{{ cliente_form.telefone_celular.id_for_label }}">{{ cliente_form.telefone_celular.label }}</label>
+          {{ cliente_form.telefone_celular }}
+          {% if cliente_form.telefone_celular.errors %}<div class="error-list">{{ cliente_form.telefone_celular.errors }}</div>{% endif %}
+        </div>
+        <div class="form-group">
+          <label for="{{ cliente_form.telefone_fixo.id_for_label }}">{{ cliente_form.telefone_fixo.label }}</label>
+          {{ cliente_form.telefone_fixo }}
+          {% if cliente_form.telefone_fixo.errors %}<div class="error-list">{{ cliente_form.telefone_fixo.errors }}</div>{% endif %}
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="{{ cliente_form.preferencia_contato.id_for_label }}">{{ cliente_form.preferencia_contato.label }}</label>
+        {{ cliente_form.preferencia_contato }}
+        {% if cliente_form.preferencia_contato.errors %}<div class="error-list">{{ cliente_form.preferencia_contato.errors }}</div>{% endif %}
+      </div>
+    </div>
+
+    <button type="submit" class="btn-primary">Salvar alterações</button>
+    <div style="margin-top:12px;text-align:center;">
+      <a href="{% url 'conta_excluir' %}" class="btn-danger">Excluir minha conta</a>
+    </div>
+  </form>
+</div>
+
+<script>
+// Máscaras similares às do cadastro
+document.addEventListener('DOMContentLoaded', function() {
+  const cpfInput = document.getElementById('{{ cliente_form.cpf.id_for_label }}');
+  if (cpfInput) {
+    cpfInput.addEventListener('input', function(e) {
+      let value = e.target.value.replace(/\D/g, '');
+      if (value.length <= 11) {
+        value = value.replace(/(\d{3})(\d)/, '$1.$2');
+        value = value.replace(/(\d{3})(\d)/, '$1.$2');
+        value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+        e.target.value = value;
+      }
+    });
+  }
+  const cepInput = document.getElementById('{{ cliente_form.cep.id_for_label }}');
+  if (cepInput) {
+    // Corrige restrições de input no cliente
+    cepInput.setAttribute('maxlength', '9');
+    cepInput.setAttribute('inputmode', 'numeric');
+    cepInput.setAttribute('pattern', '\\d{5}-?\\d{3}');
+    let cepFetching = false;
+    const fetchCEP = async () => {
+      if (cepFetching) return;
+      const digits = cepInput.value.replace(/\D/g, '');
+      if (digits.length !== 8) return;
+      try {
+        cepFetching = true;
+        const resp = await fetch(`/api/cep/${digits}/`, { headers: { 'Accept': 'application/json' } });
+        if (!resp.ok) throw new Error('CEP não encontrado');
+        const data = await resp.json();
+        const logradouro = document.getElementById('{{ cliente_form.logradouro.id_for_label }}');
+        const bairro = document.getElementById('{{ cliente_form.bairro.id_for_label }}');
+        const cidade = document.getElementById('{{ cliente_form.cidade.id_for_label }}');
+        const estado = document.getElementById('{{ cliente_form.estado.id_for_label }}');
+        if (logradouro) logradouro.value = data.logradouro || '';
+        if (bairro) bairro.value = data.bairro || '';
+        if (cidade) cidade.value = data.cidade || '';
+        if (estado) estado.value = (data.estado || '').toUpperCase();
+      } catch (err) {
+        console.warn('Falha ao buscar CEP:', err);
+      } finally {
+        cepFetching = false;
+      }
+    };
+    cepInput.addEventListener('input', function(e) {
+      let value = e.target.value.replace(/\D/g, '');
+      if (value.length <= 8) {
+        value = value.replace(/(\d{5})(\d)/, '$1-$2');
+        e.target.value = value;
+      }
+    });
+    // Busca ao sair do campo (blur) e ao pressionar Tab
+    cepInput.addEventListener('blur', fetchCEP);
+    cepInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Tab') {
+        // Deixa o Tab funcionar e dispara a busca
+        setTimeout(fetchCEP, 0);
+      }
+    });
+  }
+  const celularInput = document.getElementById('{{ cliente_form.telefone_celular.id_for_label }}');
+  if (celularInput) {
+    celularInput.addEventListener('input', function(e) {
+      let value = e.target.value.replace(/\D/g, '');
+      if (value.length <= 11) {
+        value = value.replace(/(\d{2})(\d)/, '($1) $2');
+        value = value.replace(/(\d{5})(\d)/, '$1-$2');
+        e.target.value = value;
+      }
+    });
+  }
+  const fixoInput = document.getElementById('{{ cliente_form.telefone_fixo.id_for_label }}');
+  if (fixoInput) {
+    fixoInput.addEventListener('input', function(e) {
+      let value = e.target.value.replace(/\D/g, '');
+      if (value.length <= 10) {
+        value = value.replace(/(\d{2})(\d)/, '($1) $2');
+        value = value.replace(/(\d{4})(\d)/, '$1-$2');
+        e.target.value = value;
+      }
+    });
+  }
+});
+</script>
+{% endblock %}

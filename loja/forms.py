@@ -217,3 +217,83 @@ class LoginForm(forms.Form):
         label="Senha",
         widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Digite sua senha'})
     )
+
+
+class UserUpdateForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ('username', 'first_name', 'email')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['username'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Nome de usuário'})
+        self.fields['first_name'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Nome completo'})
+        self.fields['email'].widget.attrs.update({'class': 'form-control', 'placeholder': 'seu@email.com'})
+        self.fields['username'].label = "Nome de usuário"
+        self.fields['first_name'].label = "Nome completo"
+        self.fields['email'].label = "E-mail"
+
+    def clean_email(self):
+        email = (self.cleaned_data.get('email') or '').strip()
+        # Permite manter o e-mail atual; garante unicidade case-insensitive excluindo o próprio usuário
+        qs = User.objects.filter(email__iexact=email)
+        if self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        if email and qs.exists():
+            raise forms.ValidationError("Este e-mail já está cadastrado.")
+        return email
+
+
+class ClienteUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Cliente
+        fields = (
+            'cpf', 'data_nascimento', 'cep', 'logradouro', 'numero', 'complemento',
+            'bairro', 'cidade', 'estado', 'pais', 'ponto_referencia',
+            'telefone_celular', 'telefone_fixo', 'preferencia_contato'
+        )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Reaproveita widgets e placeholders similares ao cadastro
+        self.fields['cpf'].widget.attrs.update({'class': 'form-control', 'placeholder': '000.000.000-00'})
+        # CPF somente leitura no perfil (mantém envio via POST)
+        self.fields['cpf'].widget.attrs.update({'readonly': 'readonly'})
+        self.fields['cpf'].label = 'CPF (somente leitura)'
+        self.fields['data_nascimento'].widget.attrs.update({'class': 'form-control', 'type': 'date'})
+        self.fields['cep'].widget.attrs.update({'class': 'form-control', 'placeholder': '00000-000', 'maxlength': '9', 'inputmode': 'numeric', 'pattern': '\\d{5}-?\\d{3}'})
+        self.fields['logradouro'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Rua/Logradouro'})
+        self.fields['numero'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Número'})
+        self.fields['complemento'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Complemento'})
+        self.fields['bairro'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Bairro'})
+        self.fields['cidade'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Cidade'})
+        self.fields['estado'].widget.attrs.update({'class': 'form-control', 'placeholder': 'UF', 'maxlength': '2'})
+        self.fields['pais'].widget.attrs.update({'class': 'form-control'})
+        self.fields['ponto_referencia'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Ponto de referência'})
+        self.fields['telefone_celular'].widget.attrs.update({'class': 'form-control', 'placeholder': '(11) 99999-9999'})
+        self.fields['telefone_fixo'].widget.attrs.update({'class': 'form-control', 'placeholder': '(11) 3333-3333'})
+        self.fields['preferencia_contato'].widget.attrs.update({'class': 'form-control'})
+
+    def clean_cpf(self):
+        # CPF é imutável no perfil; sempre retorna o valor atual do banco
+        return getattr(self.instance, 'cpf', '')
+
+    def clean_cep(self):
+        cep = self.cleaned_data.get('cep') or ''
+        digits = re.sub(r'[^0-9]', '', cep)
+        if len(digits) != 8:
+            raise forms.ValidationError('CEP deve conter 8 dígitos.')
+        return digits
+
+    def clean_cep(self):
+        cep = (self.cleaned_data.get('cep') or '')
+        cep_limpo = re.sub(r'[^0-9]', '', cep)
+        if len(cep_limpo) != 8:
+            raise forms.ValidationError("CEP deve ter 8 dígitos.")
+        return cep_limpo
+
+    def clean_estado(self):
+        estado = self.cleaned_data.get('estado')
+        if estado:
+            return estado.upper()
+        return estado

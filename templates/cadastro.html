@@ -132,10 +132,20 @@
     
     <form method="post">
         {% csrf_token %}
+        {% if form.non_field_errors %}
+            <div class="error-list">{{ form.non_field_errors }}</div>
+        {% endif %}
         
         <!-- Dados Pessoais -->
         <div class="form-section">
             <h3>🧍‍♂️ Dados Pessoais</h3>
+            <div class="form-group">
+                <label for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <div class="error-list">{{ form.username.errors }}</div>
+                {% endif %}
+            </div>
             
             <div class="form-row">
                 <div class="form-group">
@@ -366,6 +376,30 @@ document.addEventListener('DOMContentLoaded', function() {
     // Máscara para CEP
     const cepInput = document.getElementById('{{ form.cep.id_for_label }}');
     if (cepInput) {
+        let cepFetching = false;
+        const fetchCEP = async () => {
+            if (cepFetching) return;
+            const digits = cepInput.value.replace(/\D/g, '');
+            if (digits.length !== 8) return;
+            try {
+                cepFetching = true;
+                const resp = await fetch(`/api/cep/${digits}/`, { headers: { 'Accept': 'application/json' } });
+                if (!resp.ok) throw new Error('CEP não encontrado');
+                const data = await resp.json();
+                const logradouro = document.getElementById('{{ form.logradouro.id_for_label }}');
+                const bairro = document.getElementById('{{ form.bairro.id_for_label }}');
+                const cidade = document.getElementById('{{ form.cidade.id_for_label }}');
+                const estado = document.getElementById('{{ form.estado.id_for_label }}');
+                if (logradouro) logradouro.value = data.logradouro || '';
+                if (bairro) bairro.value = data.bairro || '';
+                if (cidade) cidade.value = data.cidade || '';
+                if (estado) estado.value = (data.estado || '').toUpperCase();
+            } catch (err) {
+                console.warn('Falha ao buscar CEP:', err);
+            } finally {
+                cepFetching = false;
+            }
+        };
         cepInput.addEventListener('input', function(e) {
             let value = e.target.value.replace(/\D/g, '');
             if (value.length <= 8) {
@@ -373,24 +407,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 e.target.value = value;
             }
         });
-        cepInput.addEventListener('blur', async function(e) {
-            const digits = e.target.value.replace(/\D/g, '');
-            if (digits.length === 8) {
-                try {
-                    const resp = await fetch(`/api/cep/${digits}/`, { headers: { 'Accept': 'application/json' } });
-                    if (!resp.ok) throw new Error('CEP não encontrado');
-                    const data = await resp.json();
-                    const logradouro = document.getElementById('{{ form.logradouro.id_for_label }}');
-                    const bairro = document.getElementById('{{ form.bairro.id_for_label }}');
-                    const cidade = document.getElementById('{{ form.cidade.id_for_label }}');
-                    const estado = document.getElementById('{{ form.estado.id_for_label }}');
-                    if (logradouro && !logradouro.value) logradouro.value = data.logradouro || '';
-                    if (bairro && !bairro.value) bairro.value = data.bairro || '';
-                    if (cidade && !cidade.value) cidade.value = data.cidade || '';
-                    if (estado && !estado.value) estado.value = (data.estado || '').toUpperCase();
-                } catch (err) {
-                    console.warn('Falha ao buscar CEP:', err);
-                }
+        cepInput.addEventListener('blur', fetchCEP);
+        cepInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Tab') {
+                setTimeout(fetchCEP, 0);
             }
         });
     }

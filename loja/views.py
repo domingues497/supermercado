@@ -12,7 +12,7 @@ import re
 from urllib.request import urlopen
 from urllib.error import URLError
 from .models import Produto, Venda, VendaItem, Cliente
-from .forms import CadastroClienteForm, LoginForm
+from .forms import CadastroClienteForm, LoginForm, UserUpdateForm, ClienteUpdateForm
 
 
 def home(request):
@@ -174,6 +174,48 @@ def logout_view(request):
     logout(request)
     messages.info(request, 'Você foi desconectado.')
     return redirect('home')
+
+
+@login_required
+def perfil(request):
+    cliente = Cliente.objects.filter(usuario=request.user).first()
+    if not cliente:
+        messages.info(request, 'Complete seu cadastro para editar seus dados.')
+        return redirect('cadastro')
+
+    if request.method == 'POST':
+        user_form = UserUpdateForm(request.POST, instance=request.user)
+        cliente_form = ClienteUpdateForm(request.POST, instance=cliente)
+        if user_form.is_valid() and cliente_form.is_valid():
+            with transaction.atomic():
+                user_form.save()
+                cliente_form.save()
+            messages.success(request, 'Dados atualizados com sucesso!')
+            return redirect('perfil')
+    else:
+        user_form = UserUpdateForm(instance=request.user)
+        cliente_form = ClienteUpdateForm(instance=cliente)
+
+    return render(request, 'perfil.html', {
+        'user_form': user_form,
+        'cliente_form': cliente_form,
+    })
+
+
+@login_required
+def conta_excluir(request):
+    if request.method == 'POST':
+        # Deleta o usuário; o Cliente relacionado é removido por cascata
+        u = request.user
+        logout(request)
+        try:
+            u.delete()
+            messages.info(request, 'Sua conta foi excluída com sucesso.')
+        except Exception:
+            messages.error(request, 'Não foi possível excluir sua conta. Tente novamente.')
+        return redirect('home')
+
+    return render(request, 'conta_excluir.html')
 
 
 def carrinho(request):

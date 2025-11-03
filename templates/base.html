@@ -16,6 +16,7 @@
       {% if request.user.is_authenticated %}
         <span>Olá, {{ request.user.first_name|default:request.user.username }}!</span>
         <a href="{% url 'meus_pedidos' %}">Meus Pedidos</a>
+        <a href="{% url 'perfil' %}">Meu Perfil</a>
         <a href="{% url 'logout' %}">Sair</a>
       {% else %}
         <a href="{% url 'login' %}">Login</a>
