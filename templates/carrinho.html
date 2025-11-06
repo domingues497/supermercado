@@ -109,6 +109,16 @@
       {% if request.user.is_authenticated %}
         <form id="finalizar-form" method="post" action="{% url 'carrinho_finalizar' %}">
           {% csrf_token %}
+          <!-- Seleção de forma de pagamento -->
+          <fieldset style="margin-bottom:8px;padding:8px;border:1px solid #dee2e6;border-radius:6px;">
+            <legend style="font-size:14px;color:#333;">Forma de pagamento</legend>
+            {% for value,label in pagamento_opcoes %}
+              <label style="display:inline-flex;align-items:center;gap:6px;margin-right:12px;">
+                <input type="radio" name="forma_pagamento" value="{{ value }}" {% if preferida == value %}checked{% endif %} required />
+                <span>{{ label }}</span>
+              </label>
+            {% endfor %}
+          </fieldset>
           <button id="finalizar-btn" class="btn" type="submit">Finalizar Compra</button>
         </form>
       {% else %}

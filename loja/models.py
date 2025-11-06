@@ -32,6 +32,17 @@ class Cliente(models.Model):
         ],
         default='whatsapp'
     )
+    # Preferência de forma de pagamento para checkout
+    forma_pagamento_preferida = models.CharField(
+        max_length=20,
+        choices=[
+            ('pix', 'Pix'),
+            ('credito', 'Cartão de crédito'),
+            ('debito', 'Cartão de débito'),
+            ('boleto', 'Boleto'),
+        ],
+        default='pix'
+    )
 
     criado_em = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)
@@ -92,6 +103,33 @@ class Venda(models.Model):
     usuario = models.ForeignKey('auth.User', null=True, blank=True, on_delete=models.SET_NULL)
     criado_em = models.DateTimeField(auto_now_add=True)
     total = models.DecimalField(max_digits=10, decimal_places=2)
+    # Forma de pagamento escolhida no momento da compra
+    forma_pagamento = models.CharField(
+        max_length=20,
+        choices=[
+            ('pix', 'Pix'),
+            ('credito', 'Cartão de crédito'),
+            ('debito', 'Cartão de débito'),
+            ('boleto', 'Boleto'),
+        ],
+        default='pix'
+    )
+    # Token de confirmação do pedido
+    confirmacao_token = models.CharField(max_length=36, blank=True, default='')
+    # Status da venda
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ('novo', 'Novo'),
+            ('processando', 'Processando'),
+            ('enviado', 'Enviado'),
+            ('entregue', 'Entregue'),
+            ('recebido', 'Recebido'),
+        ],
+        default='novo'
+    )
+    # Data/hora em que o cliente confirmou recebimento
+    recebido_em = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return f"Venda #{self.id} - R$ {self.total}"

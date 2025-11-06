@@ -322,6 +322,19 @@
             </div>
         </div>
         
+        <!-- Pagamento -->
+        <div class="form-section">
+            <h3>💳 Pagamento</h3>
+            <div class="form-group">
+                <label for="{{ form.forma_pagamento_preferida.id_for_label }}">{{ form.forma_pagamento_preferida.label }}</label>
+                {{ form.forma_pagamento_preferida }}
+                {% if form.forma_pagamento_preferida.errors %}
+                    <div class="error-list">{{ form.forma_pagamento_preferida.errors }}</div>
+                {% endif %}
+                <div class="help-text">Defina sua forma de pagamento preferida para agilizar compras.</div>
+            </div>
+        </div>
+        
         <button type="submit" class="btn-primary">Criar Conta</button>
         
         <div style="text-align: center; margin-top: 16px;">

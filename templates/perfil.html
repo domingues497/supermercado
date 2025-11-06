@@ -142,6 +142,16 @@
       </div>
     </div>
 
+    <div class="form-section">
+      <h3>Pagamento</h3>
+      <div class="form-group">
+        <label for="{{ cliente_form.forma_pagamento_preferida.id_for_label }}">{{ cliente_form.forma_pagamento_preferida.label }}</label>
+        {{ cliente_form.forma_pagamento_preferida }}
+        {% if cliente_form.forma_pagamento_preferida.errors %}<div class="error-list">{{ cliente_form.forma_pagamento_preferida.errors }}</div>{% endif %}
+        <div class="help-text" style="font-size:12px;color:#666;margin-top:4px;">Sua preferência é usada como padrão no carrinho.</div>
+      </div>
+    </div>
+
     <button type="submit" class="btn-primary">Salvar alterações</button>
     <div style="margin-top:12px;text-align:center;">
       <a href="{% url 'conta_excluir' %}" class="btn-danger">Excluir minha conta</a>

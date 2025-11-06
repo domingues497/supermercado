@@ -143,6 +143,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Auth redirects
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/dashboard/'
+LOGOUT_REDIRECT_URL = '/'
 
 # Logout por inatividade (em segundos). Padrão: 15 minutos
 INACTIVITY_TIMEOUT_SECONDS = int(os.getenv('IDLE_TIMEOUT_SECONDS', '900'))

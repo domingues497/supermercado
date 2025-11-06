@@ -17,10 +17,10 @@
         <span>Olá, {{ request.user.first_name|default:request.user.username }}!</span>
         <a href="{% url 'meus_pedidos' %}">Meus Pedidos</a>
         <a href="{% url 'perfil' %}">Meu Perfil</a>
-        <a href="{% url 'logout' %}">Sair</a>
+        <a href="{% url 'logout' %}?next={% url 'home' %}">Sair</a>
       {% else %}
         <a href="{% url 'login' %}">Login</a>
-        <a href="{% url 'cadastro' %}">Cadastro</a>
+        <!--<a href="{% url 'cadastro' %}">Cadastro</a>-->
       {% endif %}
       <a href="{% url 'carrinho' %}">Carrinho</a>
       {% if request.user.is_authenticated and request.user.is_staff %}

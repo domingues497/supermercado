@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.http import HttpResponseForbidden
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
@@ -7,6 +8,7 @@ from django.contrib import messages
 from django.urls import reverse
 from django.db import transaction
 from decimal import Decimal
+import uuid
 import json
 import re
 from urllib.request import urlopen
@@ -111,6 +113,7 @@ def cadastro_view(request):
                 telefone_celular=form.cleaned_data['telefone_celular'],
                 telefone_fixo=form.cleaned_data['telefone_fixo'],
                 preferencia_contato=form.cleaned_data['preferencia_contato'],
+                forma_pagamento_preferida=form.cleaned_data['forma_pagamento_preferida'],
             )
             
             messages.success(request, 'Cadastro realizado com sucesso! Faça login para continuar.')
@@ -173,6 +176,14 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     messages.info(request, 'Você foi desconectado.')
+    # Respeita parâmetro "next" para redirecionar após logout
+    next_url = request.GET.get('next') or request.POST.get('next')
+    if next_url and url_has_allowed_host_and_scheme(
+        next_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure()
+    ):
+        return redirect(next_url)
     return redirect('home')
 
 
@@ -234,7 +245,19 @@ def carrinho(request):
             'quantidade': qtd,
             'subtotal': subtotal,
         })
-    return render(request, 'carrinho.html', { 'itens': itens, 'total': total })
+    # Opções de pagamento e preferência do usuário
+    pagamento_opcoes = [
+        ('pix', 'Pix'),
+        ('credito', 'Cartão de crédito'),
+        ('debito', 'Cartão de débito'),
+        ('boleto', 'Boleto'),
+    ]
+    preferida = None
+    if request.user.is_authenticated:
+        cliente = Cliente.objects.filter(usuario=request.user).first()
+        if cliente:
+            preferida = getattr(cliente, 'forma_pagamento_preferida', None)
+    return render(request, 'carrinho.html', { 'itens': itens, 'total': total, 'pagamento_opcoes': pagamento_opcoes, 'preferida': preferida })
 
 
 def carrinho_adicionar(request, produto_id):
@@ -409,9 +432,18 @@ def carrinho_finalizar(request):
         total += subtotal
         itens_validos.append((produto, qtd_int, preco, backorder))
 
+    # Determina forma de pagamento escolhida
+    forma = (request.POST.get('forma_pagamento') or '').strip()
+    formas_validas = {'pix', 'credito', 'debito', 'boleto'}
+    if not forma or forma not in formas_validas:
+        forma = cliente.forma_pagamento_preferida if cliente and cliente.forma_pagamento_preferida in formas_validas else 'pix'
+
     venda = Venda.objects.create(
         usuario=request.user if request.user.is_authenticated else None,
-        total=total
+        total=total,
+        forma_pagamento=forma,
+        confirmacao_token=str(uuid.uuid4()),
+        status='novo'
     )
     for produto, qtd_int, preco, backorder in itens_validos:
         VendaItem.objects.create(

@@ -57,6 +57,17 @@ class CadastroClienteForm(UserCreationForm):
         label="Data de nascimento",
         widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'})
     )
+    # Forma de pagamento preferida
+    forma_pagamento_preferida = forms.ChoiceField(
+        label="Forma de pagamento preferida",
+        choices=[
+            ('pix', 'Pix'),
+            ('credito', 'Cartão de crédito'),
+            ('debito', 'Cartão de débito'),
+            ('boleto', 'Boleto'),
+        ],
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
     
     # Endereço completo
     cep = forms.CharField(
@@ -157,6 +168,8 @@ class CadastroClienteForm(UserCreationForm):
         self.fields['username'].label = "Nome de usuário"
         self.fields['password1'].label = "Senha"
         self.fields['password2'].label = "Confirme a senha"
+        # Ajusta label da forma de pagamento
+        self.fields['forma_pagamento_preferida'].label = "Forma de pagamento preferida"
 
     def clean_cpf(self):
         cpf = self.cleaned_data.get('cpf')
@@ -250,7 +263,7 @@ class ClienteUpdateForm(forms.ModelForm):
         fields = (
             'cpf', 'data_nascimento', 'cep', 'logradouro', 'numero', 'complemento',
             'bairro', 'cidade', 'estado', 'pais', 'ponto_referencia',
-            'telefone_celular', 'telefone_fixo', 'preferencia_contato'
+            'telefone_celular', 'telefone_fixo', 'preferencia_contato', 'forma_pagamento_preferida'
         )
 
     def __init__(self, *args, **kwargs):
@@ -273,6 +286,8 @@ class ClienteUpdateForm(forms.ModelForm):
         self.fields['telefone_celular'].widget.attrs.update({'class': 'form-control', 'placeholder': '(11) 99999-9999'})
         self.fields['telefone_fixo'].widget.attrs.update({'class': 'form-control', 'placeholder': '(11) 3333-3333'})
         self.fields['preferencia_contato'].widget.attrs.update({'class': 'form-control'})
+        self.fields['forma_pagamento_preferida'].widget.attrs.update({'class': 'form-control'})
+        self.fields['forma_pagamento_preferida'].label = 'Forma de pagamento preferida'
 
     def clean_cpf(self):
         # CPF é imutável no perfil; sempre retorna o valor atual do banco
