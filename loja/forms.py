@@ -76,7 +76,9 @@ class CadastroClienteForm(UserCreationForm):
         widget=forms.TextInput(attrs={
             'class': 'form-control', 
             'placeholder': '00000-000',
-            'data-mask': '00000-000'
+            'maxlength': '9',
+            'inputmode': 'numeric',
+            'pattern': '^(?:\\d{8}|\\d{5}-\\d{3})$'
         })
     )
     logradouro = forms.CharField(
@@ -274,7 +276,7 @@ class ClienteUpdateForm(forms.ModelForm):
         self.fields['cpf'].widget.attrs.update({'readonly': 'readonly'})
         self.fields['cpf'].label = 'CPF (somente leitura)'
         self.fields['data_nascimento'].widget.attrs.update({'class': 'form-control', 'type': 'date'})
-        self.fields['cep'].widget.attrs.update({'class': 'form-control', 'placeholder': '00000-000', 'maxlength': '9', 'inputmode': 'numeric', 'pattern': '\\d{5}-?\\d{3}'})
+        self.fields['cep'].widget.attrs.update({'class': 'form-control', 'placeholder': '00000-000', 'maxlength': '9', 'inputmode': 'numeric', 'pattern': '^(?:\\d{8}|\\d{5}-\\d{3})$'})
         self.fields['logradouro'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Rua/Logradouro'})
         self.fields['numero'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Número'})
         self.fields['complemento'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Complemento'})
